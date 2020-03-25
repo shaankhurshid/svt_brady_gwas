@@ -33,4 +33,6 @@ widen <- function(data){
   return(do.call(rbind,out))
 }
 
-save(data,file='/mnt/ml4cvd/projects/skhurshid/svt_brady_gwas/phenotypes_wide_032520.RData')
+output <- widen(data)
+
+save(output,file='/mnt/ml4cvd/projects/skhurshid/svt_brady_gwas/phenotypes_wide_032520.RData')
