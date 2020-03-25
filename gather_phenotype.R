@@ -5,7 +5,7 @@ library(data.table)
 
 ### Step 1: Load and process phenotypes from big query
 ## Load data
-data <- fread(file='/mnt/ml4cvd/projects/skhurshid/svt_brady_gwas/phenotypes_long.csv',data.table=F)
+data <- fread(file='/mnt/ml4cvd/projects/skhurshid/svt_brady_gwas/phenotypes_long',data.table=F)
 
 ## Reduce columns to sample_id + phenotypes only
 data[,-c('enroll_age')]
