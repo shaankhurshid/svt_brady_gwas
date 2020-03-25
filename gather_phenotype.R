@@ -26,6 +26,8 @@ widen <- function(data){
                                subset[subset[,'disease']==j,'survyears_disease'])
       names(out[[n]])[m:(m+2)] <- c(paste0('prev_',j),paste0('incd_',j),paste0('survyears_',j))
       m <- m+3
+      if(n %% 1000){print(paste0('Just finished row ',n,' out of ',
+                                length(unique(data[,'sample_id'])),'!'))}
     }
   }
   return(do.call(rbind,out))
