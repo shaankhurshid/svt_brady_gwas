@@ -8,7 +8,7 @@ library(data.table)
 data <- fread(file='/mnt/ml4cvd/projects/skhurshid/svt_brady_gwas/phenotypes_long',data.table=F)
 
 ## Reduce columns to sample_id + phenotypes only
-data[,-c('enroll_age')]
+data[,names(data)[!(names(data) %in% 'enroll_age')]]
 
 ## Create function to convert to standard wide format
 widen <- function(data){
