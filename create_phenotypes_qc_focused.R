@@ -95,96 +95,30 @@ create<-function(trait){
   pcs1<-paste(rownames(s1[s1[,4]<0.05,]),collapse=",")
   
   #######
-  ##all white
-  #######
-  ab2<-subset(ab, white==1) 
-  s2<-summary(glm(form1,family="binomial",data=ab2))$coefficients
-  s2<-s2[substring(rownames(s2),1,2)=="PC",]
-  ab2.1<-ab2[,colnames(ab2)%in%c("sample_id",trait)]
-  caseN_2<-dim(ab2.1[ab2.1[,2]==1 & !is.na(ab2.1[,2]) ,])[1]
-  ctrlN_2<-dim(ab2.1[ab2.1[,2]==0 & !is.na(ab2.1[,2]) ,])[1]
-  allN_2<-dim(ab2.1[!is.na(ab1.1[,2]),])[1]
-  male_2<-dim(ab2[ab2$male==1 & !is.na(ab2.1[,2]),])[1]
-  pcs2<-paste(rownames(s2[s2[,4]<0.05,]),collapse=",")
-  
-  #######
-  ##all individuals, no relatives
-  #######
-  ab3<-subset(ab, ex_rel==0 )
-  s3<-summary(glm(form1,family="binomial",data=ab3))$coefficients
-  s3<-s3[substring(rownames(s3),1,2)=="PC",]
-  ab3.1<-ab3[,colnames(ab3)%in%c("sample_id",trait)]
-  caseN_3<-dim(ab3.1[ab3.1[,2]==1 & !is.na(ab3.1[,2]) ,])[1]
-  ctrlN_3<-dim(ab3.1[ab3.1[,2]==0 & !is.na(ab3.1[,2]) ,])[1]
-  allN_3<-dim(ab3.1[ !is.na(ab3.1[,2]),])[1]
-  male_3<-dim(ab3[ab3$male==1 &  !is.na(ab3.1[,2]),])[1]
-  pcs3<-paste(rownames(s3[s3[,4]<0.05,]),collapse=",")
-  
-  #######
-  ##all individuals
-  #######
-  ab4<-subset(ab, ex_sex==0 & ex_poor==0 & ex_misKin==0 )
-  s4<-summary(glm(form1,family="binomial",data=ab4))$coefficients
-  s4<-s4[substring(rownames(s4),1,2)=="PC",]
-  ab4.1<-ab4[,colnames(ab4)%in%c("sample_id",trait)]
-  caseN_4<-dim(ab4.1[ab4.1[,2]==1 & !is.na(ab4.1[,2]) ,])[1]
-  ctrlN_4<-dim(ab4.1[ab4.1[,2]==0 & !is.na(ab4.1[,2]) ,])[1]
-  allN_4<-dim(ab4.1[!is.na(ab4.1[,2]),])[1]
-  male_4<-dim(ab4[ab4$male==1 & !is.na(ab4.1[,2]),])[1]
-  pcs4<-paste(rownames(s4[s4[,4]<0.05,]),collapse=",")
-  
-  #######
-  ##all British white, no relatives
-  #######
-  ab5<-subset(ab, ex_rel==0 & in_white_British_ancestry_subset==1)
-  s5<-summary(glm(form1,family="binomial",data=ab5))$coefficients
-  s5<-s5[substring(rownames(s5),1,2)=="PC",]
-  ab5.1<-ab5[,colnames(ab5)%in%c("sample_id",trait)]
-  caseN_5<-dim(ab5.1[ab5.1[,2]==1 & !is.na(ab5.1[,2]) ,])[1]
-  ctrlN_5<-dim(ab5.1[ab5.1[,2]==0 & !is.na(ab5.1[,2]) ,])[1]
-  allN_5<-dim(ab5.1[!is.na(ab5.1[,2]),])[1]
-  male_5<-dim(ab5[ab5$male==1 & !is.na(ab5.1[,2]),])[1]
-  pcs5<-paste(rownames(s5[s5[,4]<0.05,]),collapse=",")
-  
-  #######
-  ##all British white
-  #######
-  ab6<-subset(ab, in_white_British_ancestry_subset==1) 
-  s6<-summary(glm(form1,family="binomial",data=ab6))$coefficients
-  s6<-s6[substring(rownames(s6),1,2)=="PC",]
-  ab6.1<-ab6[,colnames(ab6)%in%c("sample_id",trait)]
-  caseN_6<-dim(ab6.1[ab6.1[,2]==1 & !is.na(ab6.1[,2]) ,])[1]
-  ctrlN_6<-dim(ab6.1[ab6.1[,2]==0 & !is.na(ab6.1[,2]) ,])[1]
-  allN_6<-dim(ab6.1[!is.na(ab6.1[,2]) ,])[1]
-  male_6<-dim(ab6[ab6$male==1 & !is.na(ab6.1[,2]) ,])[1]
-  pcs6<-paste(rownames(s6[s6[,4]<0.05,]),collapse=",")
-  
-  
-  #######
   ##create summary file
   #######
   t1<-c("case",caseN_1,"control",ctrlN_1,"all",allN_1,"mean_age",round(mean(ab1[!is.na(ab1[,2]) ,]$enroll_age),2),"sd_age",round(sd(ab1[!is.na(ab1[,2]) ,]$enroll_age),2),"male_N",male_1,"male%",round(mean(ab1[!is.na(ab1[,2]) ,]$male)*100,2),"related-PCs",ifelse((pcs1!=""),pcs1,"None"))
-  t2<-c("case",caseN_2,"control",ctrlN_2,"all",allN_2,"mean_age",round(mean(ab2[!is.na(ab2[,2]) ,]$enroll_age),2),"sd_age",round(sd(ab2[!is.na(ab2[,2]) ,]$enroll_age),2),"male_N",male_2,"male%",round(mean(ab2[!is.na(ab2[,2]) ,]$male)*100,2),"related-PCs",ifelse((pcs2!=""),pcs2,"None"))
-  t3<-c("case",caseN_3,"control",ctrlN_3,"all",allN_3,"mean_age",round(mean(ab3[!is.na(ab3[,2]) ,]$enroll_age),2),"sd_age",round(sd(ab3[!is.na(ab3[,2]) ,]$enroll_age),2),"male_N",male_3,"male%",round(mean(ab3[!is.na(ab3[,2]) ,]$male)*100,2),"related-PCs",ifelse((pcs3!=""),pcs3,"None"))
-  t4<-c("case",caseN_4,"control",ctrlN_4,"all",allN_4,"mean_age",round(mean(ab4[!is.na(ab4[,2]) ,]$enroll_age),2),"sd_age",round(sd(ab4[!is.na(ab4[,2]) ,]$enroll_age),2),"male_N",male_4,"male%",round(mean(ab4[!is.na(ab4[,2]) ,]$male)*100,2),"related-PCs",ifelse((pcs4!=""),pcs4,"None"))
-  t5<-c("case",caseN_5,"control",ctrlN_5,"all",allN_5,"mean_age",round(mean(ab5[!is.na(ab5[,2]) ,]$enroll_age),2),"sd_age",round(sd(ab5[!is.na(ab5[,2]) ,]$enroll_age),2),"male_N",male_5,"male%",round(mean(ab5[!is.na(ab5[,2]) ,]$male)*100,2),"related-PCs",ifelse((pcs5!=""),pcs5,"None"))
-  t6<-c("case",caseN_6,"control",ctrlN_6,"all",allN_6,"mean_age",round(mean(ab6[!is.na(ab6[,2]) ,]$enroll_age),2),"sd_age",round(sd(ab6[!is.na(ab6[,2]) ,]$enroll_age),2),"male_N",male_6,"male%",round(mean(ab6[!is.na(ab6[,2]) ,]$male)*100,2),"related-PCs",ifelse((pcs6!=""),pcs6,"None"))
-  
-  
-  t<-cbind(t4,t3,t6,t5,t2,t1)
-  colnames(t)<-c("ALL","ALL-noRelatives","British_EUR","British_EUR-noRelatives","EUR","EUR-noRelatives")
-  write.table(t,file=paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/summary_",trait,".txt"),row.names=F,quote=F,sep="\t")
+  write.table(t1,file=paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/summary_",trait,".txt"),row.names=F,quote=F,sep="\t")
   
   
   #######
   ##create phenotype file
   #######
-  pheno<-ab4[,colnames(ab4)%in%c("sample_id",trait,"enroll_age","ex_rel")]
+  pheno<-ab1[,c("sample_id",'trait',"male","enroll_age","array",rownames(s1[s1[,4]<0.05,]))]
   write.table(pheno,file=paste0('/Volumes/medpop_afib/skhurshid/svt_brady_gwas/',trait,".tsv"),sep="\t",col.names =T,row.names = F,quote = F)
 }
 
 #sqc<-ab4[,c(1,29,31:70,74,75,80)]#486553
 #write.table(sqc,file="/medpop/afib/lcweng/UKBB_all/QC/sqc.tsv",sep="\t",col.names =T,row.names = F,quote = F)
 
-pheno_list <- c('')
-create("Bradyarrhythmia_AV_block_or_distal_conduction_disease")
+pheno_list <- c('Bradyarrhythmia_AV_block_or_distal_conduction_disease',
+                'Bradyarrhythmia_AV_block_or_distal_conduction_disease_HARD_V2',
+                'Bradyarrhythmia_Pacemaker_v2',
+                'Bradyarrhythmia_sinus_node_dysfunction',
+                'Bradyarrhythmia_sinus_node_dysfunction_HARD_V2',
+                'Supraventricular_arrhythmia_WPW_v2',
+                'Supraventricular_arrhythmia_SVT')
+
+for (i in pheno_list){
+  create(i)
+}
