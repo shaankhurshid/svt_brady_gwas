@@ -19,24 +19,24 @@ library(data.table)
 
 create<-function(trait){
   ##phenotype file
-  a<-fread(paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/phenotypes/",trait,'.tab.tsv'),header=T,data.table=F) #503629
+  a<-fread(paste0("/medpop/afib/skhurshid/svt_brady_gwas/phenotypes/",trait,'.tab.tsv'),header=T,data.table=F) #503629
   names(a)[names(a)=='has_disease'] <- trait
   a<-a[!is.na(a[,3]),]
   print(paste0('Total N:',nrow(a)))
   
   ##sample qc file
-  b<-fread("/Volumes/medpop_esp2/pradeep/UKBiobank/v2data/ukb_sqc_v2_7089.tsv",header=T,data.table=F) ##488377
+  b<-fread("/medpop/esp2/pradeep/UKBiobank/v2data/ukb_sqc_v2_7089.tsv",header=T,data.table=F) ##488377
   ab<-merge(a,b,by.x="sample_id",by.y="eid") #488374
   ab$array_UKBB<-ifelse(ab$genotyping_array=="UKBB",1,0)
   print(paste0('N after merge with sample QC file:',nrow(ab)))
   
   ##white British, Irish, and other white
-  white<-read.table("/Volumes/medpop_afib/chaffin/ukbb_pca/UKB.BritishIrishOtherWhite.inclusion.list.v1.txt",header=T)
+  white<-read.table("/medpop/afib/chaffin/ukbb_pca/UKB.BritishIrishOtherWhite.inclusion.list.v1.txt",header=T)
   ab$white<-ifelse(ab$sample_id%in%white$eid,1,0)
   
   ##exclusion files
-  drop<-read.csv("/Volumes/medpop_afib/data/ukb9389/exclusion/w17488_20200204.csv",header=F)
-  link<-read.csv("/Volumes/medpop_afib/data/ukb9389/ukb_app17488_app7089_link.csv",header=T)
+  drop<-read.csv("/medpop/afib/data/ukb9389/exclusion/w17488_20200204.csv",header=F)
+  link<-read.csv("/medpop/afib/data/ukb9389/ukb_app17488_app7089_link.csv",header=T)
   drop.1<-link[link$app17488%in%drop$V1,]$app7089
   ab$ex_drop<-ifelse(ab$sample_id%in%drop.1,1,0)
   
@@ -56,7 +56,7 @@ create<-function(trait){
   print(paste0('N after removal of withdrawn consent:',nrow(ab)))
   
   #This file lists the pairs of individuals related up to the third degree in the data set. It is a plaintext file with space separated columns.
-  rel<-fread("/Volumes/medpop_esp2/pradeep/UKBiobank/v2data/ukb708_rel_chr1_s488374.dat",header=T,data.table=F)
+  rel<-fread("/medpop/esp2/pradeep/UKBiobank/v2data/ukb708_rel_chr1_s488374.dat",header=T,data.table=F)
   pheno<-ab[,c('sample_id',trait)]
   names(pheno)<-c("ID","pheno")
   rel<-merge(rel,pheno,by.x="ID1",by.y="ID",all.x=T)
@@ -98,14 +98,14 @@ create<-function(trait){
   ##create summary file
   #######
   t1<-c("case",caseN_1,"control",ctrlN_1,"all",allN_1,"mean_age",round(mean(ab1[!is.na(ab1[,2]) ,]$enroll_age),2),"sd_age",round(sd(ab1[!is.na(ab1[,2]) ,]$enroll_age),2),"male_N",male_1,"male%",round(mean(ab1[!is.na(ab1[,2]) ,]$male)*100,2),"related-PCs",ifelse((pcs1!=""),pcs1,"None"))
-  write.table(t1,file=paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/summary_",trait,".txt"),row.names=F,quote=F,sep="\t")
+  write.table(t1,file=paste0("/medpop/afib/skhurshid/svt_brady_gwas/summary_",trait,".txt"),row.names=F,quote=F,sep="\t")
   
   
   #######
   ##create phenotype file
   #######
   pheno<-ab1[,c("sample_id",'trait',"male","enroll_age","array",rownames(s1[s1[,4]<0.05,]))]
-  write.table(pheno,file=paste0('/Volumes/medpop_afib/skhurshid/svt_brady_gwas/',trait,".tsv"),sep="\t",col.names =T,row.names = F,quote = F)
+  write.table(pheno,file=paste0('/medpop/afib/skhurshid/svt_brady_gwas/',trait,".tsv"),sep="\t",col.names =T,row.names = F,quote = F)
 }
 
 #sqc<-ab4[,c(1,29,31:70,74,75,80)]#486553
