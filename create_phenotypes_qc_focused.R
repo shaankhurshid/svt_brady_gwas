@@ -1,21 +1,16 @@
-############################
-######## create phenotype file ----will need AF, age, sex, array, and pcs
-############################
-
-##batch, genetic sex, pc, and EUR are in ukb_sqc_v2.txt
-##created by Mary
-#sqc<-fread("/broad/ukbb/imputed/ukb_sqc_v2.txt",header=F)
-#fam<-read.table('/path/to/ukb###_cal_chr1_v2_s488374.fam',sep=" ",header=F)
-#sqc_7089<-as.data.frame(fam$V1)
-#sqc_7089<-cbind.data.frame(fam$V1,sqc[,3:68])
-#sqc_colnames<-read.table('/medpop/afib/lcweng/UKBB_all/QC/sqc_colnames.txt',header=F)
-#colnames(sqc_7089)<-sqc_colnames$V1
-#write.table(sqc_7089,'/medpop/esp2/pradeep/UKBiobank/v2data/ukb_sqc_v2_7089.tsv',sep="\t",col.names =T,row.names = F,quote = F)
 
 ############################
-######## create phenotype file ----will need ID, phenotype, and baseline age
+######## script to create processed phenotypes
 ############################
 library(data.table)
+
+# Function to create phenotypes
+## TRAIT = single phenotype as string for which you want to build a dataset
+## EXCLUDE ALL BOTH = vector of phenotype names as strings where you want to exclude both cases and controls with condition at any time
+## EXCLUDE ALL CASES = vector of phenotype names as strings where you want to exclude cases with the condition at any time
+## EXCLUDE ALL CONTROLS = vector of phenotype names as strings where you want to exclude controls with the condition at any time
+## EXCLUDE INCIDENT CASES = vector of phenotype names as strings where you want to exclude cases with the condition BEFORE case diagnosis
+## EXCLUDE FLEXIBLE = vector of phenotype names as strings where you want to exclude cases with the condition BEFORE case diagnosis AND controls with the condition at any time
 
 create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_controls=NULL,
                  exclude_incident_cases=NULL,exclude_flexible=NULL){
