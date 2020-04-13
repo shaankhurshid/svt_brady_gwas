@@ -17,7 +17,7 @@ create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_
   ##phenotype file
   a<-fread(paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/phenotypes/",trait,'.tab.tsv'),header=T) #503629
   setnames(a,'has_disease',trait)
-  a<-a[!is.na(trait)]
+  a<-a[!is.na(get(trait))]
   print(paste0('Total N:',nrow(a)))
   
   ##sample qc file
@@ -92,31 +92,32 @@ create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_
   
   # Loop over "exclude incident" - only cases with exclusion phenotype before disease removed
   if (length(exclude_incident_cases)!=0){
-  for (i in exclude_incident_cases){
-    exclude <- fread(paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/phenotypes/",i,'.tab.tsv'),header=T)
-    setkey(ab,sample_id); setkey(exclude,sample_id)
-    ab[exclude,':='(exclude_prev=i.prevalent_disease,exclude_incd=i.incident_disease,exclude_censor = i.censor_age)]
-    ab[,exclude := ifelse(c(c(!is.na(get(trait)) & get(trait)==1) & 
-                              c(c(!is.na(exclude_prev) & exclude_prev==1) | 
-                                  c(!is.na(exclude_incd) & (exclude_incd == 1) & (exclude_censor <= censor_date)))),1,0)]
-       print(paste0('I am going to exclude ',sum(ab$exclude),' individuals for diagnosis: ',i,' occurring before case diagnosis'))
-       ab <- ab[exclude==0]
-       ab <- ab[,!(c('exclude_prev','exclude_incd','exclude_censor','exclude'))]
-  }}
+    for (i in exclude_incident_cases){
+      exclude <- fread(paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/phenotypes/",i,'.tab.tsv'),header=T)
+      setkey(ab,sample_id); setkey(exclude,sample_id)
+      ab[exclude,':='(exclude_disease = i.has_disease, exclude_prev = i.prevalent_dsease, exclude_censor = i.censor_date)]
+      ab[,exclude := ifelse(c(c(!is.na(get(trait)) & get(trait)==1) & 
+                                c(c(!is.na(exclude_disease) & (exclude_censor <= censor_date)) |
+                                c(!is.na(exclude_disease) & exclude_prev==1))),1,0)]
+      print(paste0('I am going to exclude ',sum(ab$exclude),' individuals for diagnosis: ',i,' occurring before case diagnosis'))
+      ab <- ab[exclude==0]
+      ab <- ab[,!(c('exclude_prev','exclude_censor','exclude_disease','exclude'))]
+    }}
   
   # Loop over "exclude flexible" - excludes any instance of exclusion phenotype among controls, and only exclusion phenotype prior to disease for cases
   if (length(exclude_flexible)!=0){
-  for (i in exclude_flexible){
-    exclude <- fread(paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/phenotypes/",i,'.tab.tsv'),header=T)
-    setkey(ab,sample_id); setkey(exclude,sample_id)
-    ab[exclude,':='(exclude_prev=i.prevalent_disease,exclude_incd=i.incident_disease,exclude_censor = i.censor_age)]
-    ab[,exclude := ifelse(c(!is.na(get(trait)) & get(trait)==1),
-                          ifelse(c(c(!is.na(exclude_prev) & exclude_prev==1) | c(!is.na(exclude_incd) & (exclude_incd == 1) & (exclude_censor <= censor_date))),1,0),
-                                 ifelse(c(c(!is.na(exclude_prev) & exclude_prev==1) | c(!is.na(exclude_incd) & exclude_incd==1)),1,0))]
-    print(paste0('I am going to exclude ',sum(ab$exclude),' individuals for diagnosis: ',i,' occurring before case diagnosis or at any time for controls'))
-       ab <- ab[exclude==0]
-       ab <- ab[,!(c('exclude_prev','exclude_incd','exclude_censor','exclude'))]
-  }}
+    for (i in exclude_flexible){
+      exclude <- fread(paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/phenotypes/",i,'.tab.tsv'),header=T)
+      setkey(ab,sample_id); setkey(exclude,sample_id)
+      ab[exclude,':='(exclude_incd = i.incident_disease, exclude_disease = i.has_disease, exclude_prev = i.prevalent_disease, exclude_censor = i.censor_date)]
+      ab[,exclude := ifelse(c(!is.na(get(trait)) & get(trait)==1),
+                            ifelse(c(!is.na(exclude_prev) & exclude_prev==1),1,
+                            ifelse(c(!is.na(exclude_incd) & (exclude_incd==1) & (exclude_censor <= censor_date)),1,0)),
+                            ifelse(c(!is.na(exclude_disease) & exclude_disease==1),1,0))]
+      print(paste0('I am going to exclude ',sum(ab$exclude),' individuals for diagnosis: ',i,' occurring before case diagnosis or at any time for controls'))
+      ab <- ab[exclude==0]
+      ab <- ab[,!(c('exclude_disease','exclude_prev','exclude_incd','exclude_censor','exclude'))]
+    }}
   
   #This file lists the pairs of individuals related up to the third degree in the data set. It is a plaintext file with space separated columns.
   rel<-fread("/Volumes/medpop_esp2/pradeep/UKBiobank/v2data/ukb708_rel_chr1_s488374.dat",header=T)
@@ -175,7 +176,13 @@ create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_
   #######
   ##create phenotype file
   #######
-  pheno<-ab1[,c("sample_id",trait,"male","enroll_age","array_UKBB",rownames(s1[s1[,4]<0.05,])),with=F]
+  ## Choose columns
+  pheno<-ab1[,c("sample_id",trait,"enroll_age",rownames(s1[s1[,4]<0.05,]),"array_UKBB","male"),with=F]
+  ## Format for PLINK
+  setnames(pheno,"sample_id","FID")
+  pheno[,':='(IID = FID)]
+  pheno[,eval(trait) := ifelse(c(!is.na(get(trait)) | get(trait)==0),1,2)]
+  setcolorder(pheno,c('FID','IID'))
   print(paste0('Final phenotype N: ',nrow(pheno)))
   write.table(pheno,file=paste0('/Volumes/medpop_afib/skhurshid/svt_brady_gwas/processed_phenotypes/',trait,".tsv"),sep="\t",col.names =T,row.names = F,quote = F)
 }
