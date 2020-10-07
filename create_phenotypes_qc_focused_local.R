@@ -13,9 +13,10 @@ library(data.table)
 ## EXCLUDE FLEXIBLE = vector of phenotype names as strings where you want to exclude cases with the condition BEFORE case diagnosis AND controls with the condition at any time
 
 create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_controls=NULL,
-                 exclude_incident_cases=NULL,exclude_flexible=NULL){
+                 exclude_incident_cases=NULL,exclude_flexible=NULL,
+                 pheno_path){
   ##phenotype file
-  a<-fread(paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/phenotypes/",trait,'.tab.tsv'),header=T) #503629
+  a<-fread(paste0(pheno_path,trait,'.csv'),header=T) #503629
   setnames(a,'has_disease',trait)
   a<-a[!is.na(get(trait))]
   print(paste0('Total N:',nrow(a)))
@@ -26,15 +27,14 @@ create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_
   ab <- a[b,nomatch=0]
   ab[,':='(array_UKBB = ifelse(genotyping_array=='UKBB',1,0))]
   print(paste0('N after merge with sample QC file:',nrow(ab)))
-  
+    
   ##white British, Irish, and other white
   white<-fread("/Volumes/medpop_afib/chaffin/ukbb_pca/UKB.BritishIrishOtherWhite.inclusion.list.v1.txt",header=T)
   ab[,':='(white = ifelse(sample_id %in% white$eid,1,0))]
   
   ##exclusion files
-  drop<-fread("/Volumes/medpop_afib/data/ukb9389/exclusion/w17488_20200204.csv",header=F)
-  link<-fread("/Volumes/medpop_afib/data/ukb9389/ukb_app17488_app7089_link.csv",header=T)
-  drop.1<-link[app17488%in%drop$V1]$app7089
+  drop<-fread("/Volumes/medpop_afib/skhurshid/phenotypes/withdrawals/w7089_20200820.csv",header=T)
+  drop.1<-drop$sample_id
   ab[,':='(ex_drop = ifelse(sample_id %in% drop.1,1,0))]
   
   ##remove poor quality
@@ -55,7 +55,7 @@ create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_
   # Loop over "exclude all both" phenotypes - all individuals with exclusion phenotype at any time removed for both cases/controls
   if (length(exclude_all_both)!=0){
   for (i in exclude_all_both){
-    exclude <- fread(paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/phenotypes/",i,'.tab.tsv'),header=T)
+    exclude <- fread(paste0(pheno_path,i,'.csv'),header=T)
     setkey(ab,sample_id); setkey(exclude,sample_id)
     ab[exclude,':='(exclude_prev=i.prevalent_disease,exclude_incd=i.incident_disease,exclude_censor = i.censor_age)]
     ab[,exclude := ifelse(c(c(!is.na(exclude_prev) & exclude_prev==1) | c(!is.na(exclude_incd) & exclude_incd == 1)),1,0)]
@@ -67,7 +67,7 @@ create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_
   # Loop over "exclude all cases" phenotypes - all individuals with exclusion phenotype at any time removed for cases
   if (length(exclude_all_cases)!=0){
   for (i in exclude_all_cases){
-    exclude <- fread(paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/phenotypes/",i,'.tab.tsv'),header=T)
+    exclude <- fread(paste0(pheno_path,i,'.csv'),header=T)
     setkey(ab,sample_id); setkey(exclude,sample_id)
     ab[exclude,':='(exclude_prev=i.prevalent_disease,exclude_incd=i.incident_disease,exclude_censor = i.censor_age)]
     ab[,exclude := ifelse(c(c(!is.na(get(trait)) & get(trait)==1) & 
@@ -80,7 +80,7 @@ create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_
   # Loop over "exclude all controls" phenotypes - all individuals with exclusion phenotype at any time removed for controls
   if (length(exclude_all_controls)!=0){
    for (i in exclude_all_controls){
-    exclude <- fread(paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/phenotypes/",i,'.tab.tsv'),header=T)
+    exclude <- fread(paste0(pheno_path,i,'.csv'),header=T)
     setkey(ab,sample_id); setkey(exclude,sample_id)
     ab[exclude,':='(exclude_prev=i.prevalent_disease,exclude_incd=i.incident_disease,exclude_censor = i.censor_age)]
     ab[,exclude := ifelse(c(c(get(trait)==0 | is.na(get(trait))) & 
@@ -93,7 +93,7 @@ create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_
   # Loop over "exclude incident" - only cases with exclusion phenotype before disease removed
   if (length(exclude_incident_cases)!=0){
     for (i in exclude_incident_cases){
-      exclude <- fread(paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/phenotypes/",i,'.tab.tsv'),header=T)
+      exclude <- fread(paste0(pheno_path,i,'.csv'),header=T)
       setkey(ab,sample_id); setkey(exclude,sample_id)
       ab[exclude,':='(exclude_disease = i.has_disease, exclude_prev = i.prevalent_dsease, exclude_censor = i.censor_date)]
       ab[,exclude := ifelse(c(c(!is.na(get(trait)) & get(trait)==1) & 
@@ -107,7 +107,7 @@ create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_
   # Loop over "exclude flexible" - excludes any instance of exclusion phenotype among controls, and only exclusion phenotype prior to disease for cases
   if (length(exclude_flexible)!=0){
     for (i in exclude_flexible){
-      exclude <- fread(paste0("/Volumes/medpop_afib/skhurshid/svt_brady_gwas/phenotypes/",i,'.tab.tsv'),header=T)
+      exclude <- fread(paste0(pheno_path,i,'.csv'),header=T)
       setkey(ab,sample_id); setkey(exclude,sample_id)
       ab[exclude,':='(exclude_incd = i.incident_disease, exclude_disease = i.has_disease, exclude_prev = i.prevalent_disease, exclude_censor = i.censor_date)]
       ab[,exclude := ifelse(c(!is.na(get(trait)) & get(trait)==1),
@@ -131,9 +131,9 @@ create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_
   rel <- rel[pheno,pheno.ID2:=i.pheno]
   
   # Now create a list of people to remove for relatedness
-  rel[,rel_id := ifelse(is.na(pheno.ID1) & pheno.ID2==0,ID2,
+  rel[,rel_id := ifelse(is.na(pheno.ID1) & pheno.ID2==0,ID1,
                         ifelse(is.na(pheno.ID2) & pheno.ID1==0,ID2,
-                               ifelse(is.na(pheno.ID2) & is.na(pheno.ID2),ID2,
+                               ifelse(is.na(pheno.ID2),ID2,
                                       ifelse(c(pheno.ID2==1 & c(pheno.ID1==0 | is.na(pheno.ID1))),ID1,
                                              ifelse(pheno.ID1==0 & pheno.ID2==0,ID2,
                                                     ifelse(pheno.ID1==1,ID2,NA))))))]
@@ -155,7 +155,7 @@ create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_
   #######
   ##all white, no relatives
   #######
-  ab1<-ab[c(ex_rel==0 & white==1)]
+  ab1<-ab[white==1 & ex_rel==0]
   form1<-formula(paste0(trait,"~enroll_age + ",paste0("PC",1:40,collapse="+"),"+ array_UKBB + male",collapse="+"))
   s1<-summary(glm(form1,family="binomial",data=ab1))$coefficients
   s1<-s1[substring(rownames(s1),1,2)=="PC",]
@@ -177,14 +177,14 @@ create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_
   ##create phenotype file
   #######
   ## Choose columns
-  pheno<-ab1[,c("sample_id",trait,"enroll_age",rownames(s1[s1[,4]<0.05,]),"array_UKBB","male"),with=F]
+  pheno<-ab1[,c("sample_id",trait,"enroll_age",rownames(s1)[1:5],"array_UKBB","male"),with=F]
   ## Format for PLINK
   setnames(pheno,"sample_id","FID")
   pheno[,':='(IID = FID)]
-  pheno[,eval(trait) := ifelse(c(!is.na(get(trait)) | get(trait)==0),1,2)]
+  pheno[,eval(trait) := ifelse(c(!is.na(get(trait)) & get(trait)==0),1,2)]
   setcolorder(pheno,c('FID','IID'))
   print(paste0('Final phenotype N: ',nrow(pheno)))
-  write.table(pheno,file=paste0('/Volumes/medpop_afib/skhurshid/svt_brady_gwas/processed_phenotypes/',trait,".tsv"),sep="\t",col.names =T,row.names = F,quote = F)
+  write.table(pheno,file=paste0('/Volumes/medpop_afib/skhurshid/svt_brady_gwas/processed_phenotypes/v2/',trait,".tsv"),sep="\t",col.names =T,row.names = F,quote = F)
 }
 
 #sqc<-ab4[,c(1,29,31:70,74,75,80)]#486553
@@ -204,27 +204,34 @@ create<-function(trait,exclude_all_both=NULL,exclude_all_cases=NULL,exclude_all_
 
 create(trait="Bradyarrhythmia_AV_block_or_distal_conduction_disease",
        exclude_flexible=c("Cardiac_surgery","Myocardial_infarction","Valvular_disease_unspecified"),
-       exclude_all_controls=c('Bradyarrhythmia_sinus_node_dysfunction','Bradyarrhythmia_Pacemaker_v2'))
+       exclude_all_controls=c('Bradyarrhythmia_sinus_node_dysfunction','Bradyarrhythmia_Pacemaker_v2'),
+       pheno_path = '/Volumes/medpop_afib/skhurshid/phenotypes/2020_06/svt_brady/')
 
 create(trait="Bradyarrhythmia_AV_block_or_distal_conduction_disease_HARD_V2",
        exclude_flexible=c("Cardiac_surgery","Myocardial_infarction","Valvular_disease_unspecified"),
-       exclude_all_controls=c('Bradyarrhythmia_sinus_node_dysfunction','Bradyarrhythmia_Pacemaker_v2'))
+       exclude_all_controls=c('Bradyarrhythmia_sinus_node_dysfunction','Bradyarrhythmia_Pacemaker_v2'),
+       pheno_path = '/Volumes/medpop_afib/skhurshid/phenotypes/2020_06/svt_brady/')
 
 create(trait="Bradyarrhythmia_Pacemaker_v2",
        exclude_flexible=c("Cardiac_surgery","Myocardial_infarction","Valvular_disease_unspecified"),
-       exclude_all_controls=c('Bradyarrhythmia_sinus_node_dysfunction','Bradyarrhythmia_AV_block_or_distal_conduction_disease'))
+       exclude_all_controls=c('Bradyarrhythmia_sinus_node_dysfunction','Bradyarrhythmia_AV_block_or_distal_conduction_disease'),
+       pheno_path = '/Volumes/medpop_afib/skhurshid/phenotypes/2020_06/svt_brady/')
 
 create(trait="Bradyarrhythmia_sinus_node_dysfunction",
        exclude_flexible=c("Cardiac_surgery","Myocardial_infarction","Valvular_disease_unspecified"),
-       exclude_all_controls=c('Bradyarrhythmia_AV_block_or_distal_conduction_disease','Bradyarrhythmia_Pacemaker'))
+       exclude_all_controls=c('Bradyarrhythmia_AV_block_or_distal_conduction_disease','Bradyarrhythmia_Pacemaker_v2'),
+       pheno_path = '/Volumes/medpop_afib/skhurshid/phenotypes/2020_06/svt_brady/')
 
 create(trait="Bradyarrhythmia_sinus_node_dysfunction_HARD_V2",
        exclude_flexible=c("Cardiac_surgery","Myocardial_infarction","Valvular_disease_unspecified"),
-       exclude_all_controls=c('Bradyarrhythmia_AV_block_or_distal_conduction_disease','Bradyarrhythmia_Pacemaker'))
+       exclude_all_controls=c('Bradyarrhythmia_AV_block_or_distal_conduction_disease','Bradyarrhythmia_Pacemaker_v2'),
+       pheno_path = '/Volumes/medpop_afib/skhurshid/phenotypes/2020_06/svt_brady/')
 
 create(trait="Supraventricular_arrhythmia_WPW_v2",
-       exclude_all_both=c("Hypertrophic_cardiomyopathy","Congenital_heart_disease_Ebstein_anomaly"))
+       exclude_all_both=c("Hypertrophic_cardiomyopathy","Congenital_heart_disease_Ebstein_anomaly"),
+       pheno_path = '/Volumes/mdpop_afib/skhurshid/phenotypes/2020_06/svt_brady/')
 
 create(trait="Supraventricular_arrhythmia_SVT",
-       exclude_all_both=c("Hypertrophic_cardiomyopathy","Congenital_heart_disease_Ebstein_anomaly"))
+       exclude_all_both=c("Hypertrophic_cardiomyopathy","Congenital_heart_disease_Ebstein_anomaly"),
+       pheno_path = '/Volumes/medpop_afib/skhurshid/phenotypes/2020_06/svt_brady/')
 
