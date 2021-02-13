@@ -200,22 +200,22 @@ create(trait="Bradyarrhythmia_AV_block_or_distal_conduction_disease",
        pheno_path = '/medpop/esp2/projects/UK_Biobank/Phenotype_Library/phenoV3_r202006/disease_gp/')
 
 create(trait="Bradyarrhythmia_AV_block_or_distal_conduction_disease_HARD_V2",
-       exclude_flexible=c("Cardiac_surgery","Myocardial_infarction","Valvular_disease_unspecified"),
+       exclude_flexible=c("Cardiac_surgery","Myocardial_Infarction","Valvular_disease_unspecified"),
        exclude_all_controls=c('Bradyarrhythmia_sinus_node_dysfunction','Bradyarrhythmia_Pacemaker_v2'),
        pheno_path = '/medpop/esp2/projects/UK_Biobank/Phenotype_Library/phenoV3_r202006/disease_gp/')
 
 create(trait="Bradyarrhythmia_Pacemaker_v2",
-       exclude_flexible=c("Cardiac_surgery","Myocardial_infarction","Valvular_disease_unspecified"),
+       exclude_flexible=c("Cardiac_surgery","Myocardial_Infarction","Valvular_disease_unspecified"),
        exclude_all_controls=c('Bradyarrhythmia_sinus_node_dysfunction','Bradyarrhythmia_AV_block_or_distal_conduction_disease'),
        pheno_path = '/medpop/esp2/projects/UK_Biobank/Phenotype_Library/phenoV3_r202006/disease_gp/')
 
 create(trait="Bradyarrhythmia_sinus_node_dysfunction",
-       exclude_flexible=c("Cardiac_surgery","Myocardial_infarction","Valvular_disease_unspecified"),
+       exclude_flexible=c("Cardiac_surgery","Myocardial_Infarction","Valvular_disease_unspecified"),
        exclude_all_controls=c('Bradyarrhythmia_AV_block_or_distal_conduction_disease','Bradyarrhythmia_Pacemaker_v2'),
        pheno_path = '/medpop/esp2/projects/UK_Biobank/Phenotype_Library/phenoV3_r202006/disease_gp/')
 
 create(trait="Bradyarrhythmia_sinus_node_dysfunction_HARD_V2",
-       exclude_flexible=c("Cardiac_surgery","Myocardial_infarction","Valvular_disease_unspecified"),
+       exclude_flexible=c("Cardiac_surgery","Myocardial_Infarction","Valvular_disease_unspecified"),
        exclude_all_controls=c('Bradyarrhythmia_AV_block_or_distal_conduction_disease','Bradyarrhythmia_Pacemaker_v2'),
        pheno_path = '/medpop/esp2/projects/UK_Biobank/Phenotype_Library/phenoV3_r202006/disease_gp/')
 
