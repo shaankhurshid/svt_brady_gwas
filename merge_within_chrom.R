@@ -6,25 +6,23 @@
 library(data.table)
 
 merge_results <- function(paths,phenos){
-  for (path in paths){
+  for (iter in 1:length(paths)){
+    
+  path <- paths[iter]; pheno <- phenos[iter]
   setwd(path)
-  frq_file <- list.files(pattern="*.freq")
-
-  for (pheno in phenos){
   
-   frq_file1<-frq_file[grep(pheno,frq_file)]
-   for (chr in c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22")){
-    
+  frq_file <- list.files(pattern="*.freq")
+  frq_file1<-frq_file[grep(pheno,frq_file)]
+  for (chr in c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chr20","chr21","chr22")){
      frq_file2<-frq_file1[grep(paste0(chr,"\\."),frq_file1)]
-     info0<-fread(paste0("/Volumes/broad_ukbb/imputed_v3/ukb_mfi_",chr,"_v3.txt"),header=F,data.table=F)
-    
+     info0<-fread(paste0("/broad/ukbb/imputed_v3/ukb_mfi_",chr,"_v3.txt"),header=F,data.table=F)
      number <- sapply(strsplit(as.character(frq_file2), split= "\\."), '[', 3)
      file0<-NULL
      for (num in number){
         log<-fread(paste0(pheno,".",chr,".",num,".assoc.",pheno,".glm.logistic"),header=T,data.table=F)
         frq<-fread(paste0(pheno,".",chr,".",num,".assoc.afreq"),header=T,data.table=F)
       
-        info<-read.table(paste0("/Volumes/medpop_afib/lcweng/UKBB_all/SVT_Brady/UKbiobank_analysis/chunk/variantList_",chr,"_info04.",num,".temp.txt"),header=F,as.is=T)
+        info<-read.table(paste0("/medpop/afib/lcweng/UKBB_all/SVT_Brady/UKbiobank_analysis/chunk/variantList_",chr,"_info04.",num,".temp.txt"),header=F,as.is=T)
         info<-info0[info0$V2%in%info$V1,c(2,4,5,8)]
         names(info)<-c("ID","V4","V5","info")
       
@@ -51,5 +49,9 @@ merge_results <- function(paths,phenos){
       write.table(file0,file=paste0(pheno,".",chr,".UKBB.EUR.noRel.logistic"),quote=F,row.names=F,sep="\t")
    }
   }
-  }
 }
+
+paths <- c('/medpop/afib/skhurshid/svt_brady_gwas/svt_brady_gwas/analysis_snd_hard/temp/')
+phenos <- c("Bradyarrhythmia_sinus_node_dysfunction_HARD_V2")
+
+merge_results(paths=paths,phenos=phenos)
