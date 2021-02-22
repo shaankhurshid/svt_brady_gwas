@@ -68,7 +68,7 @@ merge_across <- function(paths,phenos){
   for (chr in c(1:22)){
     a<-fread(paste0(pheno,".chr",chr,".UKBB.EUR.noRel.logistic"),header=T,data.table=F)
     a$ID3<-paste0(a$ID,a$NON_EFFECT_ALLELE,a$EFFECT_ALLELE,a$INFO)
-    b<-read.table(paste0("/medpop/afib/lcweng/UKBB_all/SVT_Brady/UKbiobank_analysis/variantList_chr",chr,"_info04.txt.gz"),header=F,data.table=F)
+    b<-read.table(paste0("/medpop/afib/lcweng/UKBB_all/SVT_Brady/UKbiobank_analysis/variantList_chr",chr,"_info04.txt.gz"),header=F)
     print(length(a$ID))
     print(length(unique(a$ID3)))
     print(length(b$V1))
