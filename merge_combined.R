@@ -87,7 +87,7 @@ paths <- c('/medpop/afib/skhurshid/svt_brady_gwas/svt_brady_gwas/analysis2/temp/
 phenos <- c("Bradyarrhythmia_sinus_node_dysfunction",
             "Bradyarrhythmia_sinus_node_dysfunction_HARD_V2")
 
-merge_results(paths=paths,phenos=phenos)
+#merge_results(paths=paths,phenos=phenos)
 merge_across(paths=paths,phenos=phenos)
 
 
