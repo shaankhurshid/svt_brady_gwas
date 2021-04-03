@@ -9,7 +9,7 @@ phenos <- c('SVT','WPW_EUR','AVNRT_EUR','SND_INC','SND_REST','DISTAL_INC','DISTA
 paths <- paste0(root,phenos,'/METAANALYSIS1.TBL')
 
 # Loop and reformat
-for (i in 1:length(paths)){
+for (i in 1:1){
   file <- fread(paths[i])
   splits <- do.call(rbind,strsplit(file$MarkerName,':'))
   file[,':='(Chr = splits[,1],
