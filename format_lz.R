@@ -14,5 +14,5 @@ for (i in 1:length(paths)){
   splits <- do.call(rbind,strsplit(file$MarkerName,':'))
   file[,':='(Chr = as.numeric(splits[,1]),
              Genpos = as.numeric(splits[,2]))]
-  write.table(file,'/medpop/afib/skhurshid/svt_brady_gwas/meta_outputs/',phenos[i],'.tsv',sep='\t',row.names=F)
+  write.table(file=paste0('/medpop/afib/skhurshid/svt_brady_gwas/meta_outputs/',phenos[i],'.tsv'),quote=F,sep='\t',row.names=F)
 }
