@@ -10,9 +10,9 @@ paths <- paste0(root,phenos,'/METAANALYSIS1.TBL')
 
 # Loop and reformat
 for (i in 1:length(paths)){
-  file <- fread(paths[i])
+  tbl <- fread(paths[i])
   splits <- do.call(rbind,strsplit(file$MarkerName,':'))
-  file[,':='(Chr = as.numeric(splits[,1]),
+  tbl[,':='(Chr = as.numeric(splits[,1]),
              Genpos = as.numeric(splits[,2]))]
-  write.table(file=paste0('/medpop/afib/skhurshid/svt_brady_gwas/meta_outputs/',phenos[i],'.tsv'),quote=F,sep='\t',row.names=F)
+  write.table(tbl,file=paste0('/medpop/afib/skhurshid/svt_brady_gwas/meta_outputs/',phenos[i],'.tsv'),quote=F,sep='\t',row.names=F)
 }
