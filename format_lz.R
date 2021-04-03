@@ -12,7 +12,7 @@ paths <- paste0(root,phenos,'/METAANALYSIS1.TBL')
 for (i in 1:1){
   file <- fread(paths[i])
   splits <- do.call(rbind,strsplit(file$MarkerName,':'))
-  file[,':='(Chr = splits[,1],
-             Genpos = splits[,2])]
-  write.table(file,'/medpop/afib/skhurshid/svt_brady_gwas/meta_outputs/',phenos[i],'.tsv',sep='\t',row.names=F)
+  file[,':='(Chr = as.numeric(splits[,1]),
+             Genpos = as.numeric(splits[,2]))]
+  #write.table(file,'/medpop/afib/skhurshid/svt_brady_gwas/meta_outputs/',phenos[i],'.tsv',sep='\t',row.names=F)
 }
