@@ -5,7 +5,7 @@ library(data.table)
 
 # List paths
 root <- '/medpop/afib/projects/SVT_BRADY/Preliminary/Meta_analysis/'
-phenos <- c('SVT','WPW_EUR','AVNRT_EUR','SND_INC','SND_REST','DISTAL_INC','DISTAL_REST','PACER_EUR')
+phenos <- c('DISTAL_INC','DISTAL_REST','PACER_EUR')
 paths <- paste0(root,phenos,'/METAANALYSIS1.TBL')
 
 # Loop and reformat
